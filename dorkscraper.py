@@ -41,21 +41,41 @@ def google_search(query, api_key, cse_id, num_results=10):
 def shell_mode():
     print("[DorkScraper] > Welcome to the interactive shell.")
     while True:
-        command = input("[DorkScraper] > ")
-        if command.startswith("dork "):
-            dork_query = command.split("dork ", 1)[1]
-            num_results = int(input("Enter the number of pages to search: "))
-            results = google_search(dork_query, API_KEY, CSE_ID, num_results)
+        command = input("[DorkScraper] > ").strip()
+        
+        if command in ["exit", "quit"]:
+            print("Exiting interactive shell.")
+            break
+        elif command in ["-h", "help"]:
+            print("""
+    Commands in the shell:
+    -d your_dork -p number_of_pages : Perform a dorking search.
+    -h show help : Display help information.
+    exit : Exit the interactive shell.
+            """)
+        elif command.startswith("-d "):
+            # Parsing input command
+            parts = command.split(" -p ")
+            dork_query = parts[0][3:].strip()  # Remove '-d ' from the string
+            
+            num_pages = 1  # Default pages
+            if len(parts) > 1:
+                try:
+                    num_pages = int(parts[1].strip())
+                except ValueError:
+                    print("[ERROR] Invalid number of pages. Using default (1).")
+
+            # Pastikan API_KEY dan CSE_ID sudah diatur
+            api_key, cse_id = check_api_credentials()
+            
+            print(f"Searching for dork: {dork_query} on {num_pages} pages...")
+            results = google_search(dork_query, api_key, cse_id, num_pages)
+
             if results:
                 for idx, item in enumerate(results, 1):
                     print(f"{idx}. {item['link']}")
             else:
                 print("No results found.")
-        elif command == "-h" or command == "help":
-            print_help()
-        elif command == "exit":
-            print("Exiting interactive shell.")
-            break
         else:
             print("Unrecognized command. Type 'help' for assistance.")
 
