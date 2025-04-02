@@ -53,7 +53,11 @@ def loading_animation():
 def shell_mode():
     print(colored("[DorkScraper]", "blue") + colored(" > ", "white") + "Welcome to the interactive shell.")
     while True:
+<<<<<<< HEAD
         command = input(colored("[DorkScraper]", "blue") + colored(" > ", "white")).strip()
+=======
+        command = input("[DorkScraper] > ").strip()
+>>>>>>> 386211f164890db58315cd399e875995c2d444b6
         
         if command in ["exit", "quit"]:
             print("Exiting interactive shell.")
@@ -75,12 +79,17 @@ def shell_mode():
                 try:
                     num_pages = int(parts[1].strip())
                 except ValueError:
+<<<<<<< HEAD
                     print(colored("[ERROR]", 'red') + colored(" Invalid number of pages. Using default (1).", 'white')) 
 
+=======
+                    print("[ERROR] Invalid number of pages. Using default (1).")
+>>>>>>> 386211f164890db58315cd399e875995c2d444b6
 
             # Pastikan API_KEY dan CSE_ID sudah diatur
             api_key, cse_id = check_api_credentials()
             
+<<<<<<< HEAD
             print(colored("[INFO]", 'blue') + colored(f" Searching for dork: {dork_query} on {num_pages} pages...", 'green'))
 
             # Mulai animasi loading di thread terpisah
@@ -91,12 +100,21 @@ def shell_mode():
 
             loading_thread.join()  # Tunggu sampai animasi loading selesai
 
+=======
+            print(f"Searching for dork: {dork_query} on {num_pages} pages...")
+            results = google_search(dork_query, api_key, cse_id, num_pages)
+
+>>>>>>> 386211f164890db58315cd399e875995c2d444b6
             if results:
                 print(colored("[INFO]", 'blue') + colored(f" Found {len(results)} result(s):", 'green'))
                 for idx, item in enumerate(results, 1):
                     print(f"{idx}. {item['link']}")
             else:
+<<<<<<< HEAD
                 print(colored("[INFO]", 'blue') + colored(f"No results found.", 'red'))
+=======
+                print("No results found.")
+>>>>>>> 386211f164890db58315cd399e875995c2d444b6
         else:
             print("Unrecognized command. Type 'help' for assistance.")
 
