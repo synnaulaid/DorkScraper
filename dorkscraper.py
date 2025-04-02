@@ -1,9 +1,14 @@
-# INITIAL PROGRAM THIS BETA VERSION
 import argparse
 import googleapiclient.discovery
 import sys
 import json
 import os
+import time
+import threading
+import colorama
+from termcolor import colored
+
+colorama.init(autoreset=True)
 
 CONFIG_FILE = 'config.json'
 
@@ -38,10 +43,17 @@ def google_search(query, api_key, cse_id, num_results=10):
     res = service.cse().list(q=query, cx=cse_id, num=num_results).execute()
     return res['items'] if 'items' in res else []
 
+def loading_animation():
+    loading_symbols = ['|', '/', '-', '\\']
+    for _ in range(10):  # Simple 10-step loading animation
+        for symbol in loading_symbols:
+            print(f"{colored('[INFO]', 'blue')} {colored('Searching', 'green')} {symbol}", end='\r')
+            time.sleep(0.1)
+
 def shell_mode():
-    print("[DorkScraper] > Welcome to the interactive shell.")
+    print(colored("[DorkScraper]", "blue") + colored(" > ", "white") + "Welcome to the interactive shell.")
     while True:
-        command = input("[DorkScraper] > ").strip()
+        command = input(colored("[DorkScraper]", "blue") + colored(" > ", "white")).strip()
         
         if command in ["exit", "quit"]:
             print("Exiting interactive shell.")
@@ -63,19 +75,28 @@ def shell_mode():
                 try:
                     num_pages = int(parts[1].strip())
                 except ValueError:
-                    print("[ERROR] Invalid number of pages. Using default (1).")
+                    print(colored("[ERROR]", 'red') + colored(" Invalid number of pages. Using default (1).", 'white')) 
+
 
             # Pastikan API_KEY dan CSE_ID sudah diatur
             api_key, cse_id = check_api_credentials()
             
-            print(f"Searching for dork: {dork_query} on {num_pages} pages...")
+            print(colored("[INFO]", 'blue') + colored(f" Searching for dork: {dork_query} on {num_pages} pages...", 'green'))
+
+            # Mulai animasi loading di thread terpisah
+            loading_thread = threading.Thread(target=loading_animation)
+            loading_thread.start()
+
             results = google_search(dork_query, api_key, cse_id, num_pages)
 
+            loading_thread.join()  # Tunggu sampai animasi loading selesai
+
             if results:
+                print(colored("[INFO]", 'blue') + colored(f" Found {len(results)} result(s):", 'green'))
                 for idx, item in enumerate(results, 1):
                     print(f"{idx}. {item['link']}")
             else:
-                print("No results found.")
+                print(colored("[INFO]", 'blue') + colored(f"No results found.", 'red'))
         else:
             print("Unrecognized command. Type 'help' for assistance.")
 
@@ -89,14 +110,23 @@ def print_help():
     """)
 
 def cli_mode(dork_query, num_results):
-    print(f"Searching for dork: {dork_query} on page 1...")
+    print(colored("[INFO]", 'blue') + colored(f" Searching for dork: {dork_query} on pages...", 'green'))
     api_key, cse_id = check_api_credentials()
+
+    # Start animasi di background
+    loading_thread = threading.Thread(target=loading_animation)
+    loading_thread.start()
+
     results = google_search(dork_query, api_key, cse_id, num_results)
+
+    loading_thread.join()  # Tunggu animasi selesai sebelum menampilkan hasil
+
     if results:
+        print(colored("[INFO]", 'blue') + colored(f" Found {len(results)} result(s):", 'green'))
         for idx, item in enumerate(results, 1):
             print(f"{idx}. {item['link']}")
     else:
-        print("No results found.")
+        print(colored("[INFO]", 'blue') + colored(f"No results found.", 'red'))
 
 def main():
     parser = argparse.ArgumentParser(description="DorkScraper is a powerful tool for Google Dorking and scraping valuable data from Google search results using Custom Search Engine (CSE) and Google APIs. It allows you to perform advanced search queries to discover hidden or sensitive information on the web.")
